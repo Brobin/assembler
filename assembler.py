@@ -45,8 +45,8 @@ class Assembler:
 			line = code[x]
 			if ":" in line:
 				name = line[0:line.index(":")]
-				new_label - Label(name, x)
-				labels.append(new_label)
+				if name not in labels:
+					labels[name] = x
 				line = line[line.index(":"):len(line)]
 			tokens = re.findall(r"[\w']+", line)
 			new_command = Command(tokens, x)

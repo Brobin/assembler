@@ -17,7 +17,8 @@ header = ["DEPTH = 256;",
 
 footer = ["END;"]
 
-output_file = open("code.mif", 'w')
 output = header + output + footer
+
+output_file = open("code.mif", 'w')
 for line in output:
   output_file.write("%s\n" % line)

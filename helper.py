@@ -14,12 +14,6 @@ class Command():
 		self.tokens = tokens
 		self.index = index
 
-# Contains the data for a function label
-class Label():
-	def __init__(self, name, index):
-		self.name = name
-		self.index = index
-
 # Has a dictionary of all possible OpCodes
 class OpCodes():
 	def __init__(self):
