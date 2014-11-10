@@ -8,3 +8,4 @@
 | helper.py | contains classes that the assembler uses (Command, InstrctionType, OpCodes, OpCode), also, I'm bad at naming things, so yeah |
 | program.py | actually runs the assembler |
 | code.s | example input file |
+| instructions.md | description of the instruction registers for different types of instructions |

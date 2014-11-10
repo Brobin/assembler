@@ -76,7 +76,7 @@ class Assembler:
 		s = "0"
 		cond = "0000"
 		op = instruction.opx + s + cond + instruction.op_code
-		return "\t{0}\t:\t{1}{2};".format(str(command.index), registers, op)
+		return "\t{0}\t\t\t:\t{1}{2};".format(str(command.index), registers, op)
 
 	# Creates the D tpe machine code for a given command
 	def d_type(self, command):
