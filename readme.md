@@ -6,7 +6,7 @@
 |------|-------------|
 | assembler.py | contains the actual assembler. reads the lines of the assembly file and converts it to machine code |
 | code.s | example input file |
-| helper.py | contains classes that the assembler uses (Command, InstrctionType, OpCodes, OpCode), also, I'm bad at naming things, so yeah |
+| helper.py | contains classes that the assembler uses (Command, InstructionType, OpCodes, OpCode), also, I'm bad at naming things, so yeah |
 | program.py | actually runs the assembler |
 | readme.md | you're reading it... |
 
