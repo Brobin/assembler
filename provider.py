@@ -42,8 +42,8 @@ class OpCodes():
 
 # Contains the data for a single OpCode
 class OpCode():
-	def __init__(self, instruction, type, op_code, opx=None):
-		self.instruction = instruction
+	def __init__(self, name, type, op_code, opx=None):
+		self.name = name
 		self.type = type
 		self.op_code = op_code
 		if opx is not None:
