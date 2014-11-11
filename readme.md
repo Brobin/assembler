@@ -5,10 +5,10 @@
 | File | Description |
 |------|-------------|
 | assembler.py | contains the actual assembler. reads the lines of the assembly file and converts it to machine code |
-| program.py | actually runs the assembler |
-| provider.py | contains classes that the assembler uses (Command, InstrctionType, OpCodes, OpCode), also, I'm bad at naming things, so yeah |
 | code.s | example input file |
-| instructions.md | description of the instruction registers for different types of instructions |
+| program.py | actually runs the assembler |
+| provider.py | contains classes that the assembler uses (Command, InstructionType, OpCodes, OpCode), also, I'm bad at naming things, so yeah |
+| readme.md | you're reading it... |
 
 ###R-Type
 
