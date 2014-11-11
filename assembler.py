@@ -42,7 +42,8 @@ class Assembler:
 	def validate_tokens(self, command, length):
 		tokens = command.tokens
 		if len(tokens) is not length:
-			raise Exception("Error on instruction {0}: Requires {1} arguments".format(str(command.index), str(length)))
+			raise Exception("Error on instruction {0}: Requires {1} arguments".
+				format(str(command.index), str(length)))
 
 	# Creates the machine code for a given array of instructions
 	def get_machine_code(self, code):
@@ -88,6 +89,9 @@ class Assembler:
 		    "\t[0..255]\t:\t000000000000000000000000;"
 		]
 
+	def format_output(self, index, data, op):
+		return "\t{0}\t\t\t:\t{1}{2};".format(index, data, op)
+
 	# footer for our mif file
 	def get_footer(self):
 		return ["END;"]
@@ -101,7 +105,7 @@ class Assembler:
 		rt = self.reg_to_binary(command.tokens[3], 4)
 		registers = rs + rt + rd
 		op = instruction.opx + self.s + self.cond + instruction.op_code
-		return "\t{0}\t\t\t:\t{1}{2};".format(str(command.index), registers, op)
+		return self.format_output(str(command.index), registers, op)
 
 	# Creates the D tpe machine code for a given command
 	def d_type(self, command):
@@ -121,7 +125,7 @@ class Assembler:
 			interrupt = self.int_to_binary(command.tokens[1], 15)
 			data = interrupt
 		op = self.s + self.cond + instruction.op_code
-		return "\t{0}\t\t\t:\t{1}{2};".format(str(command.index), data, op)
+		return self.format_output(str(command.index), data, op)
 
 	# Creates the B tpe machine code for a given command
 	def b_type(self, command):
@@ -129,12 +133,16 @@ class Assembler:
 		instruction = self.op.instructions[command.tokens[0]]
 		label = command.tokens[1]
 		if self.labels[label] is None:
-			raise Exception("Error on instruction {0}: Label '{1}' not found".format(str(command.index), label))
+			raise Exception("Error on instruction {0}: Label '{1}' not found".
+				format(str(command.index), label))
 		else:
 			label_index = self.labels[label]
-			data = self.int_to_binary(label_index, 16) + self.cond + instruction.op_code
-		return "\t{0}\t\t\t:\t{1};".format(str(command.index), data)
+			data = self.int_to_binary(label_index, 16) + self.cond
+		return self.format_output(str(command.index), data, instruction.op_code)
 
 	# Creates the J tpe machine code for a given command
 	def j_type(self, command):
-		return "\t{0}\t\t\t:\t{1};".format(str(command.index), "TO-DO: finish this thing")
+		self.validate_tokens(command, 2)
+		instruction = self.op.instructions[command.tokens[0]]
+		jump = self.int_to_binary(command.tokens[1], 20)
+		return self.format_output(str(command.index), jump, instruction.op_code)
