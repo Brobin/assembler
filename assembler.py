@@ -6,6 +6,8 @@ import re
 class Assembler:
 	def __init__(self):
 		self.op = OpCodes()
+		self.s = "0"
+		self.cond = "0000"
 
 	# Run the compilation process
 	def compile(self, code):
@@ -27,16 +29,24 @@ class Assembler:
 		return clean_code
 
 	# Converts a register address to a binary string of 4 bits
-	def reg_to_binary(self, reg):
-		number = int(reg[1:])
-		output = "{0:b}".format(number)
-		while len(output) < 4:
+	def reg_to_binary(self, reg, length):
+		number = reg[1:]
+		return self.int_to_binary(number, length)
+
+	def int_to_binary(self, number, length):
+		output = "{0:b}".format(int(number))
+		while len(output) < length:
 			output = "0" + output
 		return output
 
+	def validate_tokens(self, command, length):
+		tokens = command.tokens
+		if len(tokens) is not length:
+			raise Exception("Error on instruction {0}: Requires {1} arguments".format(str(command.index), str(length)))
+
 	# Creates the machine code for a given array of instructions
 	def get_machine_code(self, code):
-		labels = []
+		self.labels = {}
 		commands = []
 		compiled = []
 
@@ -45,12 +55,13 @@ class Assembler:
 			line = code[x]
 			if ":" in line:
 				name = line[0:line.index(":")]
-				if name not in labels:
-					labels[name] = x
+				self.labels[name] = x
 				line = line[line.index(":"):len(line)]
 			tokens = re.findall(r"[\w']+", line)
 			new_command = Command(tokens, x)
 			commands.append(new_command)
+		if len(commands) > 255:
+			raise Exception("Maximum of 255 commands!")
 
 		# Second pass, do the things, add the machine code to the list
 		for command in commands:
@@ -83,19 +94,34 @@ class Assembler:
 
 	# Creates the R type machine code for a given command
 	def r_type(self, command):
+		self.validate_tokens(command, 4)
 		instruction  = self.op.instructions[command.tokens[0]]
-		rd = self.reg_to_binary(command.tokens[1])
-		rs = self.reg_to_binary(command.tokens[2])
-		rt = self.reg_to_binary(command.tokens[3])
+		rd = self.reg_to_binary(command.tokens[1], 4)
+		rs = self.reg_to_binary(command.tokens[2], 4)
+		rt = self.reg_to_binary(command.tokens[3], 4)
 		registers = rs + rt + rd
-		s = "0"
-		cond = "0000"
-		op = instruction.opx + s + cond + instruction.op_code
+		op = instruction.opx + self.s + self.cond + instruction.op_code
 		return "\t{0}\t\t\t:\t{1}{2};".format(str(command.index), registers, op)
 
 	# Creates the D tpe machine code for a given command
 	def d_type(self, command):
-		return "\t{0}\t\t\t:\t{1};".format(str(command.index), "TO-DO: finish this thing")
+		instruction = self.op.instructions[command.tokens[0]]
+		name = instruction.name
+		if name is not "si":
+			self.validate_tokens(command, 4)
+			rt = self.reg_to_binary(command.tokens[1], 4)
+			if name is "sw" or name is "lw":
+				immediate = self.int_to_binary(command.tokens[2], 7)
+				rs = self.reg_to_binary(command.tokens[3], 4)
+			elif name is "addi":
+				rs = self.reg_to_binary(command.tokens[2], 4)
+				immediate = self.int_to_binary(command.tokens[3], 7)
+			data = rt + rs + immediate
+		else:
+			interrupt = self.int_to_binary(command.tokens[1], 15)
+			data = interrupt
+		op = self.s + self.cond + instruction.op_code
+		return "\t{0}\t\t\t:\t{1}{2};".format(str(command.index), data, op)
 
 	# Creates the B tpe machine code for a given command
 	def b_type(self, command):
