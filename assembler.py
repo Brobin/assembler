@@ -1,4 +1,4 @@
-from helper import *
+from provider import *
 import re
 
 # Class that contains methods to compile our assembly into
@@ -26,11 +26,11 @@ class Assembler:
 				clean_code.append(cleaned_line)
 		return clean_code
 
-	# Converts a register to a binary string of 4 bits
+	# Converts a register address to a binary string of 4 bits
 	def reg_to_binary(self, reg):
 		number = int(reg[1:])
 		output = "{0:b}".format(number)
-		while len(output) != 4:
+		while len(output) < 4:
 			output = "0" + output
 		return output
 
@@ -64,7 +64,22 @@ class Assembler:
 			elif instruction.type is InstructionType.J:
 				compiled.append(self.j_type(command))
 
-		return compiled
+		return self.get_header() + compiled + self.get_footer()
+
+	# header for out mif file
+	def get_header(self):
+		return ["DEPTH = 256;",
+			"WIDTH = 24;",
+			"ADDRESS_RADIX = DEC;",
+			"DATA_RADIX = BIN;\n",
+			"CONTENT",
+		    "\tBEGIN",
+		    "\t[0..255]\t:\t000000000000000000000000;"
+		]
+
+	# footer for our mif file
+	def get_footer(self):
+		return ["END;"]
 
 	# Creates the R type machine code for a given command
 	def r_type(self, command):
@@ -80,12 +95,12 @@ class Assembler:
 
 	# Creates the D tpe machine code for a given command
 	def d_type(self, command):
-		return "TO-DO: finish this thing"
+		return "\t{0}\t\t\t:\t{1};".format(str(command.index), "TO-DO: finish this thing")
 
 	# Creates the B tpe machine code for a given command
 	def b_type(self, command):
-		return "TO-DO: finish this thing"
+		return "\t{0}\t\t\t:\t{1};".format(str(command.index), "TO-DO: finish this thing")
 
 	# Creates the J tpe machine code for a given command
 	def j_type(self, command):
-		return "TO-DO: finish this thing"
+		return "\t{0}\t\t\t:\t{1};".format(str(command.index), "TO-DO: finish this thing")
