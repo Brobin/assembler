@@ -10,6 +10,7 @@ R:	sub r4,r2,r3 #0010 0011 0100 100 0 0000 1100
 D:	lw r4,4(r3) #0100 0101 0011001 0 0000 1010
 	addi r4,r4,12
 	si 2
+	b D
 
 # B-Type instructions
 

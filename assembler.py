@@ -125,7 +125,15 @@ class Assembler:
 
 	# Creates the B tpe machine code for a given command
 	def b_type(self, command):
-		return "\t{0}\t\t\t:\t{1};".format(str(command.index), "TO-DO: finish this thing")
+		self.validate_tokens(command, 2)
+		instruction = self.op.instructions[command.tokens[0]]
+		label = command.tokens[1]
+		if self.labels[label] is None:
+			raise Exception("Error on instruction {0}: Label '{1}' not found".format(str(command.index), label))
+		else:
+			label_index = self.labels[label]
+			data = self.int_to_binary(label_index, 16) + self.cond + instruction.op_code
+		return "\t{0}\t\t\t:\t{1};".format(str(command.index), data)
 
 	# Creates the J tpe machine code for a given command
 	def j_type(self, command):
