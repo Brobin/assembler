@@ -9,6 +9,6 @@ try:
 	print(program.labels)
 	output_file = open("code.mif", 'w')
 	for line in output:
-	  output_file.write("%s\n" % line)
+		output_file.write("%s\n" % line)
 except Exception as e:
-    print(str(e))
+	print(str(e))

@@ -6,6 +6,7 @@ import re
 class Assembler:
 	def __init__(self):
 		self.op = OpCodes()
+		self.labels = {}
 		self.s = "0"
 		self.cond = "0000"
 
@@ -33,12 +34,14 @@ class Assembler:
 		number = reg[1:]
 		return self.int_to_binary(number, length)
 
+	# Converts an integer to a binarys tring of given length
 	def int_to_binary(self, number, length):
 		output = "{0:b}".format(int(number))
 		while len(output) < length:
 			output = "0" + output
 		return output
 
+	# Makes sure that the command has the expected number of tokens
 	def validate_tokens(self, command, length):
 		tokens = command.tokens
 		if len(tokens) is not length:
@@ -47,11 +50,13 @@ class Assembler:
 
 	# Creates the machine code for a given array of instructions
 	def get_machine_code(self, code):
-		self.labels = {}
-		commands = []
-		compiled = []
+		commands = self.first_pass(code)
+		compiled = self.second_pass(commands)
+		return self.get_header() + compiled + self.get_footer()
 
-		# First pass, store labels and commands
+	# First pass, store labels and commands
+	def first_pass(self, code):
+		commands = []
 		for x in range(0, len(code)):
 			line = code[x]
 			if ":" in line:
@@ -63,8 +68,11 @@ class Assembler:
 			commands.append(new_command)
 		if len(commands) > 255:
 			raise Exception("Maximum of 255 commands!")
+		return commands
 
-		# Second pass, do the things, add the machine code to the list
+	# Second pass, do the things, add the machine code to the list
+	def second_pass(self, commands):
+		compiled = []
 		for command in commands:
 			instruction = self.op.instructions[command.tokens[0]]
 			if instruction.type is InstructionType.R:
@@ -75,8 +83,7 @@ class Assembler:
 				compiled.append(self.b_type(command))
 			elif instruction.type is InstructionType.J:
 				compiled.append(self.j_type(command))
-
-		return self.get_header() + compiled + self.get_footer()
+		return compiled
 
 	# header for out mif file
 	def get_header(self):
@@ -89,6 +96,7 @@ class Assembler:
 		    "\t[0..255]\t:\t000000000000000000000000;"
 		]
 
+	# Formats the output for a line of the file
 	def format_output(self, index, data, op):
 		return "\t{0}\t\t\t:\t{1}{2};".format(index, data, op)
 
@@ -132,7 +140,7 @@ class Assembler:
 		self.validate_tokens(command, 2)
 		instruction = self.op.instructions[command.tokens[0]]
 		label = command.tokens[1]
-		if self.labels[label] is None:
+		if label not in self.labels:
 			raise Exception("Error on instruction {0}: Label '{1}' not found".
 				format(str(command.index), label))
 		else:
