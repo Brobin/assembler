@@ -45,7 +45,7 @@ class Assembler:
 	def validate_tokens(self, command, length):
 		tokens = command.tokens
 		if len(tokens) is not length:
-			raise Exception("Error on instruction {0}: Requires {1} arguments".
+			raise Exception("ERROR: instruction {0}: Requires {1} arguments".
 				format(str(command.index), str(length)))
 
 	# Creates the machine code for a given array of instructions
@@ -67,7 +67,7 @@ class Assembler:
 			new_command = Command(tokens, x)
 			commands.append(new_command)
 		if len(commands) > 255:
-			raise Exception("Maximum of 255 commands!")
+			raise Exception("ERROR: Maximum of 255 commands!")
 		return commands
 
 	# Second pass, do the things, add the machine code to the list
@@ -106,12 +106,23 @@ class Assembler:
 
 	# Creates the R type machine code for a given command
 	def r_type(self, command):
-		self.validate_tokens(command, 4)
 		instruction  = self.op.instructions[command.tokens[0]]
-		rd = self.reg_to_binary(command.tokens[1], 4)
-		rs = self.reg_to_binary(command.tokens[2], 4)
-		rt = self.reg_to_binary(command.tokens[3], 4)
-		registers = rs + rt + rd
+		if instruction.name is "jr":
+			self.validate_tokens(command, 2)
+			rs = self.reg_to_binary(command.tokens[1], 4)
+			rt = "0000"
+			rd = "0000"
+		elif instruction.name is "cmp":
+			self.validate_tokens(command, 3)
+			rs = self.reg_to_binary(command.tokens[1], 4)
+			rt = self.reg_to_binary(command.tokens[2], 4)
+			rd = "0000"
+		else:
+			self.validate_tokens(command, 4)
+			rd = self.reg_to_binary(command.tokens[1], 4)
+			rt = self.reg_to_binary(command.tokens[2], 4)
+			rs = self.reg_to_binary(command.tokens[3], 4)
+		registers = rt + rs + rd
 		op = instruction.opx + self.s + self.cond + instruction.op_code
 		return self.format_output(str(command.index), registers, op)
 
@@ -141,7 +152,7 @@ class Assembler:
 		instruction = self.op.instructions[command.tokens[0]]
 		label = command.tokens[1]
 		if label not in self.labels:
-			raise Exception("Error on instruction {0}: Label '{1}' not found".
+			raise Exception("ERROR: instruction {0}: Label '{1}' not found".
 				format(str(command.index), label))
 		else:
 			label_index = self.labels[label]
