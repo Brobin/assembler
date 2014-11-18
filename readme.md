@@ -18,6 +18,18 @@ add, sub, and, or, xor, sll, cmp, jr
 |----------|----------|----------|---------|-----|--------|--------|
 | RegT | RegS |RegD | OpX | S | Cond | OpCode |
 
+`add r2, r3, r4` => r2 = r3 + r4
+
+`sub r2, r3, r4` => r2 = r3 - r4
+
+`and r2, r3, r4` => r2 = r3 AND r4
+
+`or r2, r3, r4` => r2 = r3 OR r4
+
+`xor r2, r3, r4` => r2 = r3 XOR r4
+
+`sll r2, r3, r4` => r2 = r3 << r4
+
 ### D-Type
 
 lw, sw, addi, si
