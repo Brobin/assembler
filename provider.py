@@ -10,9 +10,10 @@ class InstructionType(Enum):
 
 # Contains the data for a single line instruction
 class Command():
-	def __init__(self, tokens, index):
+	def __init__(self, tokens, index, cond):
 		self.tokens = tokens
 		self.index = index
+		self.cond = cond
 
 # Has a dictionary of all possible OpCodes
 class OpCodes():
@@ -48,3 +49,24 @@ class OpCode():
 		self.op_code = op_code
 		if opx is not None:
 			self.opx = opx
+
+class Cond():
+	def __init__(self):
+		self.list = {
+			"al": "0000",
+			"nv": "0001",
+			"eq": "0010",
+			"ne": "0011",
+			"vs": "0100",
+			"vc": "0101",
+			"mi": "0110",
+			"pl": "0111",
+			"cs": "1000",
+			"cc": "1001",
+			"hi": "1010",
+			"ls": "1011",
+			"gt": "1100",
+			"lt": "1101",
+			"ge": "1110",
+			"le": "1111"
+		}

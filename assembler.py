@@ -6,9 +6,9 @@ import re
 class Assembler:
 	def __init__(self):
 		self.op = OpCodes()
+		self.cond = Cond()
 		self.labels = {}
 		self.s = "0"
-		self.cond = "0000"
 
 	# Run the compilation process
 	def compile(self, code):
@@ -28,6 +28,16 @@ class Assembler:
 			if cleaned_line != "":
 				clean_code.append(cleaned_line)
 		return clean_code
+
+	def update_cond(self, command):
+		instruction = command.tokens[0]
+		x = len(instruction) - 2
+		if len(instruction) > 3:
+			conds = self.cond.list
+			if conds.get(instruction[x:]) is not None:
+				command.cond = conds[instruction[x:]]
+				command.tokens[0] = instruction[:x]
+		return command
 
 	# Converts a register address to a binary string of 4 bits
 	def reg_to_binary(self, reg, length):
@@ -64,7 +74,8 @@ class Assembler:
 				self.labels[name] = x
 				line = line[line.index(":"):len(line)]
 			tokens = re.findall(r"[\w']+", line)
-			new_command = Command(tokens, x)
+			new_command = Command(tokens, x, "0000")
+			new_command = self.update_cond(new_command)
 			commands.append(new_command)
 		if len(commands) > 255:
 			raise Exception("ERROR: Maximum of 255 commands!")
@@ -93,7 +104,8 @@ class Assembler:
 			"DATA_RADIX = BIN;\n",
 			"CONTENT",
 		    "\tBEGIN",
-		    "\t[0..255]\t:\t000000000000000000000000;"
+		    "\t[0..255]\t:\t000000000000000000000000;",
+		    "\t0\t\t\t:\t000000000000000000000000;"
 		]
 
 	# Formats the output for a line of the file
@@ -123,8 +135,8 @@ class Assembler:
 			rt = self.reg_to_binary(command.tokens[2], 4)
 			rs = self.reg_to_binary(command.tokens[3], 4)
 		registers = rt + rs + rd
-		op = instruction.opx + self.s + self.cond + instruction.op_code
-		return self.format_output(str(command.index), registers, op)
+		op = instruction.opx + self.s + command.cond + instruction.op_code
+		return self.format_output(str(command.index+1), registers, op)
 
 	# Creates the D tpe machine code for a given command
 	def d_type(self, command):
@@ -143,8 +155,8 @@ class Assembler:
 		else:
 			interrupt = self.int_to_binary(command.tokens[1], 15)
 			data = interrupt
-		op = self.s + self.cond + instruction.op_code
-		return self.format_output(str(command.index), data, op)
+		op = self.s + command.cond + instruction.op_code
+		return self.format_output(str(command.index+1), data, op)
 
 	# Creates the B tpe machine code for a given command
 	def b_type(self, command):
@@ -156,12 +168,12 @@ class Assembler:
 				format(str(command.index), label))
 		else:
 			label_index = self.labels[label]
-			data = self.int_to_binary(label_index, 16) + self.cond
-		return self.format_output(str(command.index), data, instruction.op_code)
+			data = self.int_to_binary(label_index, 16) + command.cond
+		return self.format_output(str(command.index+1), data, instruction.op_code)
 
 	# Creates the J tpe machine code for a given command
 	def j_type(self, command):
 		self.validate_tokens(command, 2)
 		instruction = self.op.instructions[command.tokens[0]]
 		jump = self.int_to_binary(command.tokens[1], 20)
-		return self.format_output(str(command.index), jump, instruction.op_code)
+		return self.format_output(str(command.index+1), jump, instruction.op_code)
