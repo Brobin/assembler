@@ -99,17 +99,25 @@ class Assembler:
 	# header for out mif file
 	def get_header(self):
 		return ["DEPTH = 256;",
-			"WIDTH = 24;",
+			"WIDTH = 6;",
 			"ADDRESS_RADIX = DEC;",
-			"DATA_RADIX = BIN;\n",
+			"DATA_RADIX = HEX;\n",
 			"CONTENT",
 		    "\tBEGIN",
-		    "\t[0..255]\t:\t000000000000000000000000;"
+		    "\t[0..255]\t:\t000000;"
 		]
 
 	# Formats the output for a line of the file
 	def format_output(self, index, data, op):
-		return "\t{0}\t\t\t:\t{1}{2};".format(index, data, op)
+		hex_string = self.binary_to_hex("{0}{1}".format(data, op))
+		return "\t{0}\t\t\t:\t{1};".format(index, hex_string)
+
+	def binary_to_hex(self, string):
+		string = hex(int(string, 2))
+		string = string[2:]
+		while len(string) < 6:
+			string = "{0}{1}".format("0", string)
+		return string
 
 	# footer for our mif file
 	def get_footer(self):
