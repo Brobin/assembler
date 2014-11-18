@@ -71,10 +71,10 @@ class Assembler:
 			line = code[x]
 			if ":" in line:
 				name = line[0:line.index(":")]
-				self.labels[name] = x
+				self.labels[name] = x+1
 				line = line[line.index(":"):len(line)]
 			tokens = re.findall(r"[\w']+", line)
-			new_command = Command(tokens, x, "0000")
+			new_command = Command(tokens, x+1, "0000")
 			new_command = self.update_cond(new_command)
 			commands.append(new_command)
 		if len(commands) > 255:
@@ -104,8 +104,7 @@ class Assembler:
 			"DATA_RADIX = BIN;\n",
 			"CONTENT",
 		    "\tBEGIN",
-		    "\t[0..255]\t:\t000000000000000000000000;",
-		    "\t0\t\t\t:\t000000000000000000000000;"
+		    "\t[0..255]\t:\t000000000000000000000000;"
 		]
 
 	# Formats the output for a line of the file
@@ -136,7 +135,7 @@ class Assembler:
 			rs = self.reg_to_binary(command.tokens[3], 4)
 		registers = rt + rs + rd
 		op = instruction.opx + self.s + command.cond + instruction.op_code
-		return self.format_output(str(command.index+1), registers, op)
+		return self.format_output(str(command.index), registers, op)
 
 	# Creates the D tpe machine code for a given command
 	def d_type(self, command):
@@ -156,7 +155,7 @@ class Assembler:
 			interrupt = self.int_to_binary(command.tokens[1], 15)
 			data = interrupt
 		op = self.s + command.cond + instruction.op_code
-		return self.format_output(str(command.index+1), data, op)
+		return self.format_output(str(command.index), data, op)
 
 	# Creates the B tpe machine code for a given command
 	def b_type(self, command):
@@ -169,11 +168,11 @@ class Assembler:
 		else:
 			label_index = self.labels[label]
 			data = self.int_to_binary(label_index, 16) + command.cond
-		return self.format_output(str(command.index+1), data, instruction.op_code)
+		return self.format_output(str(command.index), data, instruction.op_code)
 
 	# Creates the J tpe machine code for a given command
 	def j_type(self, command):
 		self.validate_tokens(command, 2)
 		instruction = self.op.instructions[command.tokens[0]]
 		jump = self.int_to_binary(command.tokens[1], 20)
-		return self.format_output(str(command.index+1), jump, instruction.op_code)
+		return self.format_output(str(command.index), jump, instruction.op_code)
