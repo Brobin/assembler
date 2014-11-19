@@ -29,10 +29,11 @@ class Assembler:
 				clean_code.append(cleaned_line)
 		return clean_code
 
+	# Sets the cond variables for a given command and trims the command
 	def update_cond(self, command):
 		instruction = command.tokens[0]
 		x = len(instruction) - 2
-		if len(instruction) > 3:
+		if len(instruction) > 3 and instruction is not "bal":
 			conds = self.cond.list
 			if conds.get(instruction[x:]) is not None:
 				command.cond = conds[instruction[x:]]
@@ -109,9 +110,26 @@ class Assembler:
 
 	# Formats the output for a line of the file
 	def format_output(self, index, data, op):
+		if "-" in data:
+			data = self.remove_negative(data)
 		hex_string = self.binary_to_hex("{0}{1}".format(data, op))
 		return "\t{0}\t\t\t:\t{1};".format(index, hex_string)
 
+	# Remove a negative number from a binary string
+	# Converts it into a two's complement form
+	def remove_negative(self, data):
+		data = data.replace("-", "")
+		new = ""
+		for x in data:
+			if x is "1":
+				new += "0"
+			else:
+				new += "1"
+		new = int(new, 2) + 1
+		output = self.int_to_binary(new, len(data))
+		return output
+
+	# Converts a binary string to a hex string
 	def binary_to_hex(self, string):
 		string = hex(int(string, 2))
 		string = string[2:]
@@ -126,6 +144,7 @@ class Assembler:
 	# Creates the R type machine code for a given command
 	def r_type(self, command):
 		instruction  = self.op.instructions[command.tokens[0]]
+		s = self.s
 		if instruction.name is "jr":
 			self.validate_tokens(command, 2)
 			rs = self.reg_to_binary(command.tokens[1], 4)
@@ -136,13 +155,14 @@ class Assembler:
 			rs = self.reg_to_binary(command.tokens[1], 4)
 			rt = self.reg_to_binary(command.tokens[2], 4)
 			rd = "0000"
+			s = "1"
 		else:
 			self.validate_tokens(command, 4)
 			rd = self.reg_to_binary(command.tokens[1], 4)
 			rt = self.reg_to_binary(command.tokens[2], 4)
 			rs = self.reg_to_binary(command.tokens[3], 4)
 		registers = rt + rs + rd
-		op = instruction.opx + self.s + command.cond + instruction.op_code
+		op = instruction.opx + s + command.cond + instruction.op_code
 		return self.format_output(str(command.index), registers, op)
 
 	# Creates the D tpe machine code for a given command
@@ -174,7 +194,7 @@ class Assembler:
 			raise Exception("ERROR: instruction {0}: Label '{1}' not found".
 				format(str(command.index), label))
 		else:
-			label_index = self.labels[label]
+			label_index = self.labels[label] - (command.index + 1)
 			data = self.int_to_binary(label_index, 16) + command.cond
 		return self.format_output(str(command.index), data, instruction.op_code)
 

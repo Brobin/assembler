@@ -6,7 +6,6 @@ file = open(filename)
 code = file.readlines()
 try:
 	output = program.compile(code)
-	print(program.labels)
 	output_file = open("code.mif", 'w')
 	for line in output:
 		output_file.write("%s\n" % line)

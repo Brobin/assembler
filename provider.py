@@ -34,7 +34,7 @@ class OpCodes():
 		self.instructions["addi"] = OpCode("addi", InstructionType.D, "1010")
 		self.instructions["si"] = OpCode("si", InstructionType.D, "1011")
 
-		self.instructions["b"] = OpCode("b", InstructionType.B, "0110")
+		self.instructions["b"] = OpCode("b", InstructionType.B, "0100")
 		self.instructions["bal"] = OpCode("bal", InstructionType.B, "0101")
 
 		self.instructions["j"] = OpCode("j", InstructionType.J, "0000")
