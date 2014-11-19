@@ -48,6 +48,8 @@ class Assembler:
 	# Converts an integer to a binarys tring of given length
 	def int_to_binary(self, number, length):
 		output = "{0:b}".format(int(number))
+		if "-" in output:
+			length += 1
 		while len(output) < length:
 			output = "0" + output
 		return output
@@ -120,13 +122,16 @@ class Assembler:
 	def remove_negative(self, data):
 		data = data.replace("-", "")
 		new = ""
+		print(data)
 		for x in data:
 			if x is "1":
-				new += "0"
+				new = new + "0"
 			else:
-				new += "1"
+				new = new + "1"
+		print(new)
 		new = int(new, 2) + 1
 		output = self.int_to_binary(new, len(data))
+		print(output)
 		return output
 
 	# Converts a binary string to a hex string
@@ -195,8 +200,9 @@ class Assembler:
 				format(str(command.index), label))
 		else:
 			label_index = self.labels[label] - (command.index + 1)
-			data = self.int_to_binary(label_index, 16) + command.cond
-		return self.format_output(str(command.index), data, instruction.op_code)
+			print(label_index)
+			data = self.int_to_binary(label_index, 16)
+		return self.format_output(str(command.index), data, command.cond + instruction.op_code)
 
 	# Creates the J tpe machine code for a given command
 	def j_type(self, command):
