@@ -113,13 +113,13 @@ class Assembler:
 	# Formats the output for a line of the file
 	def format_output(self, index, data, op):
 		if "-" in data:
-			data = self.remove_negative(data)
+			data = self.twos_complement(data)
 		hex_string = self.binary_to_hex("{0}{1}".format(data, op))
 		return "\t{0}\t\t\t:\t{1};".format(index, hex_string)
 
 	# Remove a negative number from a binary string
 	# Converts it into a two's complement form
-	def remove_negative(self, data):
+	def twos_complement(self, data):
 		data = data.replace("-", "")
 		new = ""
 		for x in data:
