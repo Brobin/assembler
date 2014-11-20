@@ -1,4 +1,5 @@
 import unittest
+import string
 from provider import Command
 from assembler import Assembler
 
@@ -26,7 +27,7 @@ class AssemblerTest(unittest.TestCase):
 	def test_twos_complement(self):
 		input = "0000010001110001"
 		expected = "1111101110001111"
-		result = self.assembler.twos_complement(input)
+		result = self.assembler.twos_complement(input, 16)
 		self.assertEqual(expected, result)
 
 	def test_binary_to_hex(self):
