@@ -49,9 +49,22 @@ class Assembler:
 	def int_to_binary(self, number, length):
 		output = "{0:b}".format(int(number))
 		if "-" in output:
-			length += 1
-		while len(output) < length:
-			output = "0" + output
+			output = self.twos_complement(output, length)
+		else:
+			while len(output) < length:
+				output = "0" + output
+		return output
+
+	# Remove a negative number from a binary string
+	# Converts it into a two's complement form
+	def twos_complement(self, data, length):
+		data = data.replace("-", "")
+		new = ""
+		while len(data) < length:
+			data = "0" + data
+		data = data.replace('0', '%temp%').replace('1', '0').replace('%temp%', '1')
+		number = int(data, 2) + 1
+		output = "{0:b}".format(int(number))
 		return output
 
 	# Makes sure that the command has the expected number of tokens
@@ -112,24 +125,8 @@ class Assembler:
 
 	# Formats the output for a line of the file
 	def format_output(self, index, data, op):
-		if "-" in data:
-			data = self.twos_complement(data)
 		hex_string = self.binary_to_hex("{0}{1}".format(data, op))
 		return "\t{0}\t\t\t:\t{1};".format(index, hex_string)
-
-	# Remove a negative number from a binary string
-	# Converts it into a two's complement form
-	def twos_complement(self, data):
-		data = data.replace("-", "")
-		new = ""
-		for x in data:
-			if x is "1":
-				new = new + "0"
-			else:
-				new = new + "1"
-		new = int(new, 2) + 1
-		output = self.int_to_binary(new, len(data))
-		return output
 
 	# Converts a binary string to a hex string
 	def binary_to_hex(self, string):
