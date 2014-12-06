@@ -87,8 +87,12 @@ class Assembler:
 						command.tokens[3]],
 						command.index - 1,
 						"0000")
-				#elif instruction.type is InstructionType.D:
-					#compiled.append(self.d_type(command))
+				elif instruction.type is InstructionType.D:
+					compare = Command(["cmp",
+						command.tokens[1],
+						command.tokens[2]],
+						command.index - 1,
+						"0000")
 				elif instruction.type is InstructionType.B:
 					compare = Command(["cmp",
 						command.tokens[1],
@@ -96,7 +100,6 @@ class Assembler:
 						command.index - 1,
 						"0000")
 					command.tokens = ["b", command.tokens[3]]
-					#compiled.append(self.b_type(command))
 				elif instruction.type is InstructionType.J:
 					compare = Command(["cmp",
 						command.tokens[1],
@@ -104,7 +107,6 @@ class Assembler:
 						command.index - 1,
 						"0000")
 					command.tokens = ["j", command.tokens[3]]
-					#compiled.append(self.j_type(command))
 				return [compare, command]
 		return [command]
 
@@ -227,11 +229,13 @@ class Assembler:
 			label_index = self.labels[label] - (command.index + 1)
 			print(label_index)
 			data = self.int_to_binary(label_index, 16)
-		return self.format_output(str(command.index), data, command.cond + instruction.op_code)
+		return self.format_output(str(command.index),
+			data, command.cond + instruction.op_code)
 
 	# Creates the J type machine code for a given command
 	def j_type(self, command):
 		self.validate_tokens(command, 2)
 		instruction = self.op.instructions[command.tokens[0]]
 		jump = self.int_to_binary(command.tokens[1], 20)
-		return self.format_output(str(command.index), jump, instruction.op_code)
+		return self.format_output(str(command.index),
+			jump, instruction.op_code)
