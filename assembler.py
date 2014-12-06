@@ -9,6 +9,7 @@ class Assembler:
 		self.cond = Cond()
 		self.labels = {}
 		self.s = "0"
+		self.extra = 0
 
 	# Run the compilation process
 	def compile(self, code):
@@ -29,16 +30,83 @@ class Assembler:
 				clean_code.append(cleaned_line)
 		return clean_code
 
+	# Creates the machine code for a given array of instructions
+	def get_machine_code(self, code):
+		commands = self.first_pass(code)
+		compiled = self.second_pass(commands)
+		return self.get_header() + compiled + self.get_footer()
+
+	# First pass, store labels and commands
+	def first_pass(self, code):
+		commands = []
+		for x in range(0, len(code)):
+			line = code[x]
+			if ":" in line:
+				name = line[0:line.index(":")]
+				self.labels[name] = x + 1 + self.extra
+				line = line[line.index(":"):len(line)]
+			tokens = re.findall(r"[\w']+", line)
+			new_command = Command(tokens, x + 1 + self.extra, "0000")
+			commands = commands + self.update_cond(new_command)
+		if len(commands) > 255:
+			raise Exception("ERROR: Maximum of 255 commands!")
+		return commands
+
+	# Second pass, do the things, add the machine code to the list
+	def second_pass(self, commands):
+		compiled = []
+		for command in commands:
+			instruction = self.op.instructions[command.tokens[0]]
+			if instruction.type is InstructionType.R:
+				compiled.append(self.r_type(command))
+			elif instruction.type is InstructionType.D:
+				compiled.append(self.d_type(command))
+			elif instruction.type is InstructionType.B:
+				compiled.append(self.b_type(command))
+			elif instruction.type is InstructionType.J:
+				compiled.append(self.j_type(command))
+		return compiled
+
 	# Sets the cond variables for a given command and trims the command
+	# also adds the extra cmp instruction needed.
 	def update_cond(self, command):
 		instruction = command.tokens[0]
 		x = len(instruction) - 2
-		if len(instruction) > 3 and instruction is not "bal":
+		if len(instruction) >= 3 and instruction is not "bal":
 			conds = self.cond.list
 			if conds.get(instruction[x:]) is not None:
 				command.cond = conds[instruction[x:]]
-				command.tokens[0] = instruction[:x]
-		return command
+				self.extra += 1
+				command.index += self.extra
+				new = instruction[:x]
+				command.tokens[0] = new
+				instruction = self.op.instructions[new]
+				if instruction.type is InstructionType.R:
+					compare = Command(["cmp",
+						command.tokens[2],
+						command.tokens[3]],
+						command.index - 1,
+						"0000")
+				#elif instruction.type is InstructionType.D:
+					#compiled.append(self.d_type(command))
+				elif instruction.type is InstructionType.B:
+					compare = Command(["cmp",
+						command.tokens[1],
+						command.tokens[2]],
+						command.index - 1,
+						"0000")
+					command.tokens = ["b", command.tokens[3]]
+					#compiled.append(self.b_type(command))
+				elif instruction.type is InstructionType.J:
+					compare = Command(["cmp",
+						command.tokens[1],
+						command.tokens[2]],
+						command.index - 1,
+						"0000")
+					command.tokens = ["j", command.tokens[3]]
+					#compiled.append(self.j_type(command))
+				return [compare, command]
+		return [command]
 
 	# Converts a register address to a binary string of 4 bits
 	def reg_to_binary(self, reg, length):
@@ -73,44 +141,6 @@ class Assembler:
 		if len(tokens) is not length:
 			raise Exception("ERROR: instruction {0}: Requires {1} arguments".
 				format(str(command.index), str(length)))
-
-	# Creates the machine code for a given array of instructions
-	def get_machine_code(self, code):
-		commands = self.first_pass(code)
-		compiled = self.second_pass(commands)
-		return self.get_header() + compiled + self.get_footer()
-
-	# First pass, store labels and commands
-	def first_pass(self, code):
-		commands = []
-		for x in range(0, len(code)):
-			line = code[x]
-			if ":" in line:
-				name = line[0:line.index(":")]
-				self.labels[name] = x+1
-				line = line[line.index(":"):len(line)]
-			tokens = re.findall(r"[\w']+", line)
-			new_command = Command(tokens, x+1, "0000")
-			new_command = self.update_cond(new_command)
-			commands.append(new_command)
-		if len(commands) > 255:
-			raise Exception("ERROR: Maximum of 255 commands!")
-		return commands
-
-	# Second pass, do the things, add the machine code to the list
-	def second_pass(self, commands):
-		compiled = []
-		for command in commands:
-			instruction = self.op.instructions[command.tokens[0]]
-			if instruction.type is InstructionType.R:
-				compiled.append(self.r_type(command))
-			elif instruction.type is InstructionType.D:
-				compiled.append(self.d_type(command))
-			elif instruction.type is InstructionType.B:
-				compiled.append(self.b_type(command))
-			elif instruction.type is InstructionType.J:
-				compiled.append(self.j_type(command))
-		return compiled
 
 	# header for out mif file
 	def get_header(self):
