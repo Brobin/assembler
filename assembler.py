@@ -51,8 +51,8 @@ class Assembler:
 			tokens = re.findall(r"[\w']+", line)
 			new_command = Command(tokens, x + 1 + self.extra, "0000")
 			commands = commands + self.update_cond(new_command)
-		if len(commands) > 255:
-			raise Exception("ERROR: Maximum of 255 commands!")
+		if len(commands) > 64:
+			raise Exception("ERROR: Maximum of 64 commands!")
 		return commands
 
 	# Second pass, assembles the commands into byte-code. First
@@ -150,13 +150,13 @@ class Assembler:
 
 	# header for out mif file
 	def get_header(self):
-		return ["DEPTH = 256;",
+		return ["DEPTH = 128;",
 			"WIDTH = 6;",
 			"ADDRESS_RADIX = DEC;",
 			"DATA_RADIX = HEX;\n",
 			"CONTENT",
 		    "\tBEGIN",
-		    "\t[0..255]\t:\t000000;"
+		    "\t[0..127]\t:\t000000;"
 		]
 
 	# Formats the output for a line of the file
@@ -232,7 +232,6 @@ class Assembler:
 				format(str(command.index), label))
 		else:
 			label_index = self.labels[label] - (command.index + 1)
-			print(label_index)
 			data = self.int_to_binary(label_index, 16)
 		return self.format_output(str(command.index),
 			data, command.cond + instruction.op_code)
