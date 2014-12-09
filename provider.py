@@ -41,7 +41,7 @@ class OpCodes():
 		self.instructions["jal"] = OpCode("jal", InstructionType.J, "0001")
 		self.instructions["li"] = OpCode("li", InstructionType.J, "0010")
 
-# Contains the data for a single OpCode
+# Model for a single OpCode
 class OpCode():
 	def __init__(self, name, type, op_code, opx=None):
 		self.name = name
@@ -50,6 +50,7 @@ class OpCode():
 		if opx is not None:
 			self.opx = opx
 
+# Contains a dictionary of the conditional codes
 class Cond():
 	def __init__(self):
 		self.list = {

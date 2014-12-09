@@ -31,12 +31,15 @@ class Assembler:
 		return clean_code
 
 	# Creates the machine code for a given array of instructions
+	# Calls the first and second pass and then returns the contents
+	# of the output file as a list.
 	def get_machine_code(self, code):
 		commands = self.first_pass(code)
 		compiled = self.second_pass(commands)
 		return self.get_header() + compiled + self.get_footer()
 
 	# First pass, store labels and commands
+	# Also calls update cond to add conditional commands.
 	def first_pass(self, code):
 		commands = []
 		for x in range(0, len(code)):
@@ -52,7 +55,8 @@ class Assembler:
 			raise Exception("ERROR: Maximum of 255 commands!")
 		return commands
 
-	# Second pass, do the things, add the machine code to the list
+	# Second pass, assembles the commands into byte-code. First
+	# it checks the type, then calls the corresponding method. 
 	def second_pass(self, commands):
 		compiled = []
 		for command in commands:
@@ -115,7 +119,7 @@ class Assembler:
 		number = reg[1:]
 		return self.int_to_binary(number, length)
 
-	# Converts an integer to a binarys tring of given length
+	# Converts an integer to a binary string of given length
 	def int_to_binary(self, number, length):
 		output = "{0:b}".format(int(number))
 		if "-" in output:
@@ -196,7 +200,7 @@ class Assembler:
 		op = instruction.opx + s + command.cond + instruction.op_code
 		return self.format_output(str(command.index), registers, op)
 
-	# Creates the D tpe machine code for a given command
+	# Creates the D type machine code for a given command
 	def d_type(self, command):
 		instruction = self.op.instructions[command.tokens[0]]
 		name = instruction.name
@@ -218,6 +222,7 @@ class Assembler:
 		return self.format_output(str(command.index), data, op)
 
 	# Creates the B type machine code for a given command
+	# throws exception if a label is not found
 	def b_type(self, command):
 		self.validate_tokens(command, 2)
 		instruction = self.op.instructions[command.tokens[0]]
@@ -237,8 +242,8 @@ class Assembler:
 		instruction = self.op.instructions[command.tokens[0]]
 		if instruction.name is "li":
 			self.validate_tokens(command, 3)
-			register = self.reg_to_binary(command.tokens[1], 8)
-			immediate = self.int_to_binary(command.tokens[2], 12)
+			register = self.reg_to_binary(command.tokens[1], 4)
+			immediate = self.int_to_binary(command.tokens[2], 16)
 			output = register + immediate
 		else:
 			self.validate_tokens(command, 2)
