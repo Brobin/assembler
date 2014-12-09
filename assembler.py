@@ -234,8 +234,14 @@ class Assembler:
 
 	# Creates the J type machine code for a given command
 	def j_type(self, command):
-		self.validate_tokens(command, 2)
 		instruction = self.op.instructions[command.tokens[0]]
-		jump = self.int_to_binary(command.tokens[1], 20)
+		if instruction.name is "li":
+			self.validate_tokens(command, 3)
+			register = self.reg_to_binary(command.tokens[1], 8)
+			immediate = self.int_to_binary(command.tokens[2], 12)
+			output = register + immediate
+		else:
+			self.validate_tokens(command, 2)
+			output = self.int_to_binary(command.tokens[1], 20)
 		return self.format_output(str(command.index),
-			jump, instruction.op_code)
+			output, instruction.op_code)
