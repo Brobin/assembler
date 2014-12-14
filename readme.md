@@ -72,7 +72,8 @@ The first number is the location you want it stored in memory, and the second is
 | File | Description |
 |------|-------------|
 | assembler.py | contains the actual assembler. reads the lines of the assembly file and converts it to machine code |
-| code.s | example input file |
+| examples/final_program.s | example input file, our final program |
+| examples/final_program.mif | example output file, our final program |
 | program.py | actually runs the assembler |
 | provider.py | contains classes that the assembler uses (Command, InstructionType, OpCodes, OpCode), also, I'm bad at naming things, so yeah |
 | readme.md | you're reading it... |
