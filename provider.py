@@ -6,7 +6,7 @@ class InstructionType(Enum):
 	D = "D"
 	B = "B"
 	J = "J"
-	NOOP = "NOOP"
+	H = "H"
 
 # Contains the data for a single line instruction
 class Command():
@@ -40,6 +40,8 @@ class OpCodes():
 		self.instructions["j"] = OpCode("j", InstructionType.J, "0000")
 		self.instructions["jal"] = OpCode("jal", InstructionType.J, "0001")
 		self.instructions["li"] = OpCode("li", InstructionType.J, "0010")
+
+		self.instructions["hex"] = OpCode("hex", InstructionType.H, "0011")
 
 # Model for a single OpCode
 class OpCode():

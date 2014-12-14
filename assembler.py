@@ -51,8 +51,8 @@ class Assembler:
 			tokens = re.findall(r"[\w']+", line)
 			new_command = Command(tokens, x + 1 + self.extra, "0000")
 			commands = commands + self.update_cond(new_command)
-		if len(commands) > 64:
-			raise Exception("ERROR: Maximum of 64 commands!")
+		if len(commands) > 112:
+			raise Exception("ERROR: Maximum of 112 commands!")
 		return commands
 
 	# Second pass, assembles the commands into byte-code. First
@@ -69,10 +69,12 @@ class Assembler:
 				compiled.append(self.b_type(command))
 			elif instruction.type is InstructionType.J:
 				compiled.append(self.j_type(command))
+			elif instruction.type is InstructionType.H:
+				compiled.append(self.h_type(command))
 		return compiled
 
-	# Sets the cond variables for a given command and trims the command
-	# also adds the extra cmp instruction needed.
+	# Sets the cond variables for a given command and trims the
+	# command. also adds the extra cmp instruction needed.
 	def update_cond(self, command):
 		instruction = command.tokens[0]
 		x = len(instruction) - 2
@@ -151,7 +153,7 @@ class Assembler:
 	# header for out mif file
 	def get_header(self):
 		return ["DEPTH = 128;",
-			"WIDTH = 6;",
+			"WIDTH = 24;",
 			"ADDRESS_RADIX = DEC;",
 			"DATA_RADIX = HEX;\n",
 			"CONTENT",
@@ -247,5 +249,16 @@ class Assembler:
 		else:
 			self.validate_tokens(command, 2)
 			output = self.int_to_binary(command.tokens[1], 20)
+		return self.format_output(str(command.index),
+			output, instruction.op_code)
+
+	# Creates our custom h-type instruction
+	def h_type(self, command):
+		instruction = self.op.instructions[command.tokens[0]]
+		self.validate_tokens(command, 4)
+		rd = self.reg_to_binary(command.tokens[1], 4)
+		rs = self.reg_to_binary(command.tokens[2], 4)
+		immediate = self.int_to_binary(command.tokens[3], 7)
+		output = rd + rs + immediate + "00000"
 		return self.format_output(str(command.index),
 			output, instruction.op_code)
