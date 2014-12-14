@@ -42,17 +42,26 @@ class Assembler:
 	# Also calls update cond to add conditional commands.
 	def first_pass(self, code):
 		commands = []
+		self.data_section = []
+		data = False
 		for x in range(0, len(code)):
 			line = code[x]
-			if ":" in line:
-				name = line[0:line.index(":")]
-				self.labels[name] = x + 1 + self.extra
-				line = line[line.index(":"):len(line)]
-			tokens = re.findall(r"[\w']+", line)
-			new_command = Command(tokens, x + 1 + self.extra, "0000")
-			commands = commands + self.update_cond(new_command)
-		if len(commands) > 112:
-			raise Exception("ERROR: Maximum of 112 commands!")
+			if ";" in line:
+				data = True
+				index = line[0:line.index(";")]
+				value = line[line.index(";"):len(line)]
+				tokens = re.findall(r"[\w']+", value)
+				self.data_section.append(self.format_data_output(index, tokens[0]))
+			if not data:
+				if ":" in line:
+					name = line[0:line.index(":")]
+					self.labels[name] = x + 1 + self.extra
+					line = line[line.index(":"):len(line)]
+				tokens = re.findall(r"[\w']+", line)
+				new_command = Command(tokens, x + 1 + self.extra, "0000")
+				commands = commands + self.update_cond(new_command)
+		if len(commands) > 40:
+			raise Exception("ERROR: Maximum of 40 commands!")
 		return commands
 
 	# Second pass, assembles the commands into byte-code. First
@@ -71,7 +80,7 @@ class Assembler:
 				compiled.append(self.j_type(command))
 			elif instruction.type is InstructionType.H:
 				compiled.append(self.h_type(command))
-		return compiled
+		return compiled + self.data_section
 
 	# Sets the cond variables for a given command and trims the
 	# command. also adds the extra cmp instruction needed.
@@ -166,6 +175,9 @@ class Assembler:
 		hex_string = self.binary_to_hex("{0}{1}".format(data, op))
 		return "\t{0}\t\t\t:\t{1};".format(index, hex_string)
 
+	def format_data_output(self, index, data):
+		return "\t{0}\t\t\t:\t{1};".format(index, data)
+
 	# Converts a binary string to a hex string
 	def binary_to_hex(self, string):
 		string = hex(int(string, 2))
@@ -175,8 +187,11 @@ class Assembler:
 		return string
 
 	# footer for our mif file
+	# hardcoded i/o memory locations
 	def get_footer(self):
-		return ["END;"]
+		return [
+			"END;"
+		]
 
 	# Creates the R type machine code for a given command
 	def r_type(self, command):

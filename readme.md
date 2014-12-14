@@ -1,6 +1,6 @@
 # Assembler
 
-####Assembler for CSE230 - Computer Systems final project
+###Assembler for CSE230 - Computer Systems final project
 
 Reads in a .s assembly file and outputs a .mif (Memory initialization File)
 
@@ -21,6 +21,9 @@ URMOM:	sw r2, 4(r2)	# mem(12) = 8
 69:		addi r9, r9, 6 	# r9 = 6
 		sw r9 4(r2)		# mem(12) = 6
 		bal URMOM		# branch to URMOM
+
+40; 008000
+64; FFF5D3
 ```
 
 Example output:
@@ -48,9 +51,23 @@ CONTENT
 	13			:	990c0a;
 	14			:	920809;
 	15			:	fff305;
+	42 			:	008000;
+	64 			:	FFF5D3;
 END;
 ```
 
+### Data section
+
+Additionaly, a simple data section can be implemented. The data section should be after all of the code. I didn't have much time to make it too complicated, so for now, you create a data section like the following
+
+```
+40; 008000
+64; FFF5D3
+```
+
+The first number is the location you want it stored in memory, and the second is a 24-bit hex value that represents the data you want stored.
+
+### Supported Instructions
 
 | File | Description |
 |------|-------------|
