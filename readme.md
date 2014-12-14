@@ -67,7 +67,7 @@ Additionaly, a simple data section can be implemented. The data section should b
 
 The first number is the location you want it stored in memory, and the second is a 24-bit hex value that represents the data you want stored.
 
-### Supported Instructions
+###File List
 
 | File | Description |
 |------|-------------|
@@ -85,25 +85,16 @@ add, sub, and, or, xor, sll, cmp, jr
 |----------|----------|----------|---------|-----|--------|--------|
 | RegT | RegS |RegD | OpX | S | Cond | OpCode |
 
-`add r2, r3, r4` => r2 = r3 + r4
-
-`sub r2, r3, r4` => r2 = r3 - r4
-
-`and r2, r3, r4` => r2 = r3 AND r4
-
-`or r2, r3, r4` => r2 = r3 OR r4
-
-`xor r2, r3, r4` => r2 = r3 XOR r4
-
-`sll r2, r3, r4` => r2 = r3 << r4
 
 ### D-Type
 
-lw, sw, addi, si
+lw, sw, addi, si, hex
 
 | [23..20] | [19..16] | [15..9] | [8] | [7..4] | [3..0] | 
 |----|----|----|----|-----|-----|
 | RegT | RegS | Immediate | S | Cond | OpCode |
+
+The hex instruction is a custom instruction that we implemented to help with our final test program. It takes in the value of the switches on our board and outputs the four bits that we are looking at in order to retrieve the correct hex display value from memory.
 
 ### B-Type
 
