@@ -13,27 +13,27 @@ filename = input("\nEnter the input file name: ")
 file_out = input("Enter the output file name: ")
 
 ascii = [
-	"Assembling...\n\n"
-	"	   .-\"\"-.",
-	"	  /[] _ _\\",
-	"	 _|_o_LII|_",
-	"	/ | ==== | \\ 	BEEP BOOP",
-	"	|_| ==== |_|	BLOP BLEEP",
-	"	 ||  ||  ||	BOOP!",
-	"	 ||LI  o ||",
-	"	 ||'----'||",
-	"	/__|    |__\\"
+    "Assembling...\n\n"
+    "	   .-\"\"-.",
+    "	  /[] _ _\\",
+    "	 _|_o_LII|_",
+    "	/ | ==== | \\ 	BEEP BOOP",
+    "	|_| ==== |_|	BLOP BLEEP",
+    "	 ||  ||  ||	BOOP!",
+    "	 ||LI  o ||",
+    "	 ||'----'||",
+    "	/__|    |__\\"
 ]
 
 try:
-	file = open(filename)
-	code = file.readlines()
-	output = program.compile(code)
-	output_file = open(file_out, 'w')
-	for line in output:
-		output_file.write("%s\n" % line)
-	for line in ascii:
-		print(line)
-	print("\nAssembly successful!")
+    file = open(filename)
+    code = file.readlines()
+    output = program.compile(code)
+    output_file = open(file_out, 'w')
+    for line in output:
+        output_file.write("%s\n" % line)
+    for line in ascii:
+        print(line)
+    print("\nAssembly successful!")
 except Exception as e:
-	print(str(e))
+    print(str(e))
